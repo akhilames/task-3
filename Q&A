@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Quiz Game Application</title>
+  <style>
+    body {
+      background-color: #181a2a;
+      color: white;
+      font-family: 'Segoe UI', sans-serif;
+      padding: 40px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .quiz-box {
+      background: #272b45;
+      padding: 30px;
+      border-radius: 15px;
+      width: 100%;
+      max-width: 800px;
+    }
+
+    h2 {
+      color: #00eaff;
+    }
+
+    .question-box {
+      margin-bottom: 30px;
+    }
+
+    .question-box p {
+      font-size: 1.1em;
+      font-weight: bold;
+    }
+
+    label {
+      display: block;
+      margin: 8px 0;
+      cursor: pointer;
+    }
+
+    input[type="text"] {
+      padding: 10px;
+      margin-top: 10px;
+      width: 100%;
+      border-radius: 5px;
+      border: none;
+    }
+
+    button {
+      background-color: #00eaff;
+      color: black;
+      border: none;
+      padding: 12px 25px;
+      font-size: 16px;
+      border-radius: 8px;
+      font-weight: bold;
+      margin-right: 10px;
+      cursor: pointer;
+    }
+
+    .result {
+      font-size: 20px;
+      margin-top: 25px;
+      color: lightgreen;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+<div class="quiz-box">
+  <h2>Interactive Quiz Game</h2>
+  <div id="quiz"></div>
+  <button onclick="skipQuestion()">Skip</button>
+  <button onclick="nextQuestion()">Next</button>
+  <div class="result" id="result"></div>
+</div>
+
+<script>
+  const quizData = [
+    { question: "1. Capital of France?", type: "single", options: ["Paris", "Lyon", "Rome", "Berlin"], correct: ["Paris", "paris"] },
+    { question: "2. Which are JavaScript frameworks?", type: "multi", options: ["React", "Angular", "Laravel", "Django"], correct: ["React", "Angular"] },
+    { question: "3. Fill: HTML stands for ____.", type: "fill", correct: ["hypertext markup language", "html"] },
+    { question: "4. Select even numbers", type: "multi", options: ["1", "2", "3", "4"], correct: ["2", "4"] },
+    { question: "5. Fill: CPU stands for ____.", type: "fill", correct: ["central processing unit", "cpu"] },
+    { question: "6. Which are mammals?", type: "multi", options: ["Dog", "Shark", "Cat", "Eagle"], correct: ["Dog", "Cat"] },
+    { question: "7. Fill: JS is short for ____.", type: "fill", correct: ["javascript", "java script"] },
+    { question: "8. Primary colors?", type: "multi", options: ["Red", "Blue", "Green", "Yellow"], correct: ["Red", "Blue", "Yellow"] },
+    { question: "9. Which are front-end tools?", type: "multi", options: ["Bootstrap", "Flask", "Vue", "Express"], correct: ["Bootstrap", "Vue"] },
+    { question: "10. Fill: RAM means ____.", type: "fill", correct: ["random access memory", "ram"] }
+  ];
+
+  let currentQuestion = 0;
+  let score = 0;
+  let skipped = 0;
+
+  function loadQuestion() {
+    const quizDiv = document.getElementById("quiz");
+    quizDiv.innerHTML = "";
+
+    if (currentQuestion >= quizData.length) {
+      showResult();
+      return;
+    }
+
+    const q = quizData[currentQuestion];
+    const qDiv = document.createElement("div");
+    qDiv.classList.add("question-box");
+    qDiv.innerHTML = `<p>${q.question}</p>`;
+
+    if (q.type === "single") {
+      q.options.forEach(opt => {
+        qDiv.innerHTML += `<label><input type="radio" name="q" value="${opt}"> ${opt}</label>`;
+      });
+    } else if (q.type === "multi") {
+      q.options.forEach(opt => {
+        qDiv.innerHTML += `<label><input type="checkbox" name="q" value="${opt}"> ${opt}</label>`;
+      });
+    } else if (q.type === "fill") {
+      qDiv.innerHTML += `<input type="text" id="fillAnswer" placeholder="Your answer...">`;
+    }
+
+    quizDiv.appendChild(qDiv);
+  }
+
+  function nextQuestion() {
+    const q = quizData[currentQuestion];
+    let userAnswer = [];
+
+    if (q.type === "single") {
+      const selected = document.querySelector(`input[name="q"]:checked`);
+      if (selected && q.correct.map(a => a.toLowerCase()).includes(selected.value.toLowerCase())) {
+        score++;
+      }
+    } else if (q.type === "multi") {
+      const selectedOptions = document.querySelectorAll(`input[name="q"]:checked`);
+      selectedOptions.forEach(opt => userAnswer.push(opt.value));
+      if (
+        userAnswer.length === q.correct.length &&
+        userAnswer.every(ans => q.correct.includes(ans))
+      ) {
+        score++;
+      }
+    } else if (q.type === "fill") {
+      const input = document.getElementById("fillAnswer");
+      if (input && q.correct.map(a => a.toLowerCase()).includes(input.value.trim().toLowerCase())) {
+        score++;
+      }
+    }
+
+    currentQuestion++;
+    loadQuestion();
+  }
+
+  function skipQuestion() {
+    skipped++;
+    currentQuestion++;
+    loadQuestion();
+  }
+
+  function showResult() {
+    document.getElementById("quiz").innerHTML = "";
+    document.getElementById("result").innerHTML = `Your Score: ${score} / ${quizData.length}<br>Skipped: ${skipped}`;
+  }
+
+  loadQuestion();
+</script>
+
+</body>
+</html>
